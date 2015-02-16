@@ -1,0 +1,1 @@
+SimpleGA - basic genetic algorithm for Scala

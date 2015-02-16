@@ -1,4 +1,4 @@
-package info.rnowak.simplega.population
+package info.rnowak.simplega.population.individual
 
 import scala.util.Random
 
