@@ -3,7 +3,7 @@ package info.rnowak.simplega.population.individual
 import scala.util.Random
 
 case class PermutationIndividual(permutation: List[Int]) extends Individual {
-  override def size: Int = permutation.size
+  override def length: Int = permutation.size
 
   override def toString = permutation.mkString(", ")
 }

@@ -9,10 +9,10 @@ case class PermutationPopulation(individuals: List[PermutationIndividual]) exten
 }
 
 object PermutationPopulation {
-  def initialPopulation(populationCount: Int, individualSize: Int): PermutationPopulation = {
+  def initialPopulation(populationCount: Int, individualLength: Int): PermutationPopulation = {
     val individuals = for {
       i <- 1 to populationCount
-    } yield PermutationIndividual(individualSize)
+    } yield PermutationIndividual(individualLength)
     PermutationPopulation(individuals.toList)
   }
 }
