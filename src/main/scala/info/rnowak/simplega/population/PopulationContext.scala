@@ -1,6 +1,6 @@
 package info.rnowak.simplega.population
 
-sealed trait PopulationContext[PopulationType <: Population[_]] {
+trait PopulationContext[PopulationType <: Population] {
   def populationSize: Int
   def individualLength: Int
   
