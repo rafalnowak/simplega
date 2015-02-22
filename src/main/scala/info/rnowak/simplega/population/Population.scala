@@ -5,7 +5,7 @@ import info.rnowak.simplega.population.individual.Individual
 trait Population {
   type IndividualType <: Individual
 
-  val individuals: List[IndividualType]
+  val individuals: Seq[IndividualType]
   
   def size: Int
 }

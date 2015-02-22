@@ -4,7 +4,5 @@ import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.individual.Individual
 
 trait FitnessFunction[PopulationType <: Population] {
-  def calculate(population: PopulationType): List[IndividualWithFitness[PopulationType#IndividualType]]
+  def calculate(population: PopulationType): Seq[IndividualWithFitness[PopulationType#IndividualType]]
 }
-
-

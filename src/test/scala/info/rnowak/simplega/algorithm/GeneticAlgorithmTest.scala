@@ -14,7 +14,7 @@ import scala.util.Random
 class GeneticAlgorithmTest extends FlatSpec with Matchers {
 
   class RandomSelection extends SelectionOperator[PermutationPopulation] {
-    override def selection(individualsSorted: List[IndividualWithFitness[PermutationIndividual]]): PermutationIndividual = {
+    override def selection(individualsSorted: Seq[IndividualWithFitness[PermutationIndividual]]): PermutationIndividual = {
       val random = Random.nextInt(individualsSorted.size)
       individualsSorted(random).individual      
     }
@@ -33,7 +33,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
   }
   
   class ConstantFitness(constant: Int) extends FitnessFunction[PermutationPopulation] {
-    override def calculate(population: PermutationPopulation): List[IndividualWithFitness[PermutationIndividual]] = {
+    override def calculate(population: PermutationPopulation): Seq[IndividualWithFitness[PermutationIndividual]] = {
       population.individuals.map { individual =>
         IndividualWithFitness(individual, 5)
       }
@@ -43,7 +43,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
   "GA" should "perform one iteration in run" in {
     val iterations = 1
     val context = PermutationPopulationContext(populationSize = 3, individualLength = 3)
-    val ga = new GeneticAlgorithm()
+    val ga = new GeneticAlgorithm[PermutationPopulation]()
     
     val result = ga.run(populationContext = context,
       selectionOperator = new RandomSelection(),

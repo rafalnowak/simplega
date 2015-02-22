@@ -6,6 +6,7 @@ import info.rnowak.simplega.population.Population
 trait PopulationContext[PopulationType <: Population] {
   def populationSize: Int
   def individualLength: Int
-  
+
+  def createPopulationFromIndividuals(individuals: Seq[PopulationType#IndividualType]): PopulationType
   def createInitialPopulation(): PopulationType
 }
