@@ -1,7 +1,7 @@
 package info.rnowak.simplega.operators.crossover
 
-import info.rnowak.simplega.population.individual.Individual
+import info.rnowak.simplega.population.Population
 
-trait CrossOverOperator[IndividualType <: Individual] {
-  def crossover(individualFirst: IndividualType, individualSecond: IndividualType): IndividualType
+trait CrossOverOperator[PopulationType <: Population] {
+  def crossover(individualFirst: PopulationType#IndividualType, individualSecond: PopulationType#IndividualType): PopulationType#IndividualType
 }

@@ -1,6 +1,8 @@
 package info.rnowak.simplega.algorithm
 
 import info.rnowak.simplega.fitness.{IndividualWithFitness, FitnessFunction}
+import info.rnowak.simplega.operators.crossover.CrossOverOperator
+import info.rnowak.simplega.operators.mutation.MutationOperator
 import info.rnowak.simplega.operators.selection.SelectionOperator
 import info.rnowak.simplega.population.context.PermutationPopulationContext
 import info.rnowak.simplega.population.individual.PermutationIndividual
@@ -15,6 +17,18 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     override def selection(individualsSorted: List[IndividualWithFitness[PermutationIndividual]]): PermutationIndividual = {
       val random = Random.nextInt(individualsSorted.size)
       individualsSorted(random).individual      
+    }
+  }
+  
+  class SimpleCrossover extends CrossOverOperator[PermutationPopulation] {
+    override def crossover(individualFirst: PermutationIndividual, individualSecond: PermutationIndividual): PermutationIndividual = {
+      individualSecond      
+    }
+  }
+  
+  class SimpleMutation extends MutationOperator[PermutationPopulation] {
+    override def mutate(individual: PermutationIndividual): PermutationIndividual = {
+      individual      
     }
   }
   
@@ -33,6 +47,8 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     
     val result = ga.run(populationContext = context,
       selectionOperator = new RandomSelection(),
+      crossOverOperator = new SimpleCrossover(),
+      mutationOperator = new SimpleMutation(),
       maxIterations = iterations)(fitness = new ConstantFitness(7))
 
     result.totalIterations shouldEqual iterations
