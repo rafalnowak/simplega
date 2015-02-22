@@ -1,11 +1,6 @@
-package info.rnowak.simplega.population
+package info.rnowak.simplega.population.context
 
-trait PopulationContext[PopulationType <: Population] {
-  def populationSize: Int
-  def individualLength: Int
-  
-  def createInitialPopulation(): PopulationType
-}
+import info.rnowak.simplega.population.PermutationPopulation
 
 case class PermutationPopulationContext(populationSize: Int, individualLength: Int) extends PopulationContext[PermutationPopulation] {
   override def createInitialPopulation(): PermutationPopulation =
