@@ -1,12 +1,12 @@
 package info.rnowak.simplega.algorithm
 
-import info.rnowak.simplega.fitness.{IndividualWithFitness, FitnessFunction}
+import info.rnowak.simplega.fitness.{FitnessFunction, IndividualWithFitness}
 import info.rnowak.simplega.operators.crossover.CrossOverOperator
 import info.rnowak.simplega.operators.mutation.MutationOperator
 import info.rnowak.simplega.operators.selection.SelectionOperator
+import info.rnowak.simplega.population.PermutationPopulation
 import info.rnowak.simplega.population.context.PermutationPopulationContext
 import info.rnowak.simplega.population.individual.PermutationIndividual
-import info.rnowak.simplega.population.PermutationPopulation
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -42,14 +42,14 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
 
   "GA" should "perform one iteration in run" in {
     val iterations = 1
-    val context = PermutationPopulationContext(populationSize = 3, individualLength = 3)
-    val ga = new GeneticAlgorithm[PermutationPopulation]()
-    
-    val result = ga.run(populationContext = context,
+    val context = PermutationPopulationContext(populationSize = 3, 
+      individualLength = 3,
       selectionOperator = new RandomSelection(),
       crossOverOperator = new SimpleCrossover(),
-      mutationOperator = new SimpleMutation(),
-      maxIterations = iterations)(fitness = new ConstantFitness(7))
+      mutationOperator = new SimpleMutation())
+    val ga = new GeneticAlgorithm[PermutationPopulation]()
+    
+    val result = ga.run(populationContext = context, maxIterations = iterations)(fitness = new ConstantFitness(7))
 
     result.totalIterations shouldEqual iterations
   }
@@ -62,5 +62,18 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     
     ratedIndividuals should have size population.size
     ratedIndividuals.map(_.fitness) should equal(List(5, 5, 5))
+  }
+  
+  "Populations stream" should "work" in {
+    val iterations = 1
+    val context = PermutationPopulationContext(populationSize = 3,
+      individualLength = 3,
+      selectionOperator = new RandomSelection(),
+      crossOverOperator = new SimpleCrossover(),
+      mutationOperator = new SimpleMutation())
+    val ga = new GeneticAlgorithm[PermutationPopulation]()    
+    
+    val population = context.createInitialPopulation()
+    ga.populationStream(population)(context)(new ConstantFitness(5))
   }
 }

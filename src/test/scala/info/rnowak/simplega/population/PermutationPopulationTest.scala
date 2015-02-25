@@ -1,6 +1,6 @@
 package info.rnowak.simplega.population
 
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 class PermutationPopulationTest extends FlatSpec with Matchers {
   it should "generate initial population with given individuals count" in {
