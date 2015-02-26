@@ -5,7 +5,6 @@ import info.rnowak.simplega.operators.mutation.MutationOperator
 import info.rnowak.simplega.operators.selection.SelectionOperator
 import info.rnowak.simplega.population.Population
 
-//TODO: wywalić tę klasę
 trait PopulationContext[PopulationType <: Population] {
   def populationSize: Int
   def individualLength: Int

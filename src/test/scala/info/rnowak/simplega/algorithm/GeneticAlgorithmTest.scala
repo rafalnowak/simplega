@@ -1,6 +1,6 @@
 package info.rnowak.simplega.algorithm
 
-import info.rnowak.simplega.fitness.{FitnessFunction, IndividualWithFitness}
+import info.rnowak.simplega.fitness.{FitnessValue, FitnessFunction, IndividualWithFitness}
 import info.rnowak.simplega.operators.crossover.CrossOverOperator
 import info.rnowak.simplega.operators.mutation.MutationOperator
 import info.rnowak.simplega.operators.selection.SelectionOperator
@@ -33,9 +33,9 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
   }
   
   class ConstantFitness(constant: Int) extends FitnessFunction[PermutationPopulation] {
-    override def calculate(population: PermutationPopulation): Seq[IndividualWithFitness[PermutationIndividual]] = {
+    override def calculateFor(population: PermutationPopulation): Seq[IndividualWithFitness[PermutationIndividual]] = {
       population.individuals.map { individual =>
-        IndividualWithFitness(individual, 5)
+        IndividualWithFitness(individual, FitnessValue(5))
       }
     }
   }
@@ -49,7 +49,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
       mutationOperator = new SimpleMutation())
     val ga = new GeneticAlgorithm[PermutationPopulation]()
     
-    val result = ga.run(populationContext = context, maxIterations = iterations)(fitness = new ConstantFitness(7))
+    val result = ga.run(populationContext = context, maxIterations = iterations, minimumFitness = FitnessValue(4))(fitness = new ConstantFitness(7))
 
     result.totalIterations shouldEqual iterations
   }
@@ -58,10 +58,10 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     val population = PermutationPopulation.initialPopulation(populationCount = 3, individualLength = 3)
     val fitnessFunction = new ConstantFitness(7)
     
-    val ratedIndividuals = fitnessFunction.calculate(population)
+    val ratedIndividuals = fitnessFunction.calculateFor(population)
     
     ratedIndividuals should have size population.size
-    ratedIndividuals.map(_.fitness) should equal(List(5, 5, 5))
+    ratedIndividuals.map(_.fitness.value) should equal(Seq(5, 5, 5))
   }
   
   "Populations stream" should "work" in {
@@ -74,6 +74,6 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     val ga = new GeneticAlgorithm[PermutationPopulation]()    
     
     val population = context.createInitialPopulation()
-    ga.populationStream(population)(context)(new ConstantFitness(5))
+    ga.populationStream(population)(context, FitnessValue(5), new ConstantFitness(5))
   }
 }
