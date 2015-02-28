@@ -10,5 +10,5 @@ case class BinaryIndividual(bits: Seq[Bit]) extends Individual {
 
 object BinaryIndividual {
   def apply(individualLength: Int): BinaryIndividual = 
-    BinaryIndividual((1 to individualLength) map { i => Random.nextInt(2) })
+    BinaryIndividual((1 to individualLength) map { i => Random.nextInt(2) } map { bit => Bit(bit) })
 }
