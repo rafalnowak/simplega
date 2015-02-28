@@ -1,6 +1,7 @@
 package info.rnowak.simplega.algorithm
 
 import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
+import info.rnowak.simplega.operators.crossover.Children
 import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.context.PopulationContext
 
@@ -31,7 +32,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
         val newIndividuals = for {
           i <- 1 to currentPopulation.size
         } yield crossOverAndMutate(individualsSortedByFitness)(populationContext)
-        val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
+        val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals.flatten)
         AlgorithmStepResult[PopulationType](step.currentGeneration + 1, newPopulation, bestFitnessForPopulation(newPopulation, fitness))
       }
     )
@@ -48,11 +49,13 @@ class GeneticAlgorithm[PopulationType <: Population] {
   }
   
   private def crossOverAndMutate(individualsSorted: Seq[IndividualWithFitness[PopulationType#IndividualType]])
-                                (context: PopulationContext[PopulationType]): PopulationType#IndividualType = {
+                                (context: PopulationContext[PopulationType]): Children[PopulationType] = {
     val parentFirst = context.selectionOperator.selection(individualsSorted)
     val parentSecond = context.selectionOperator.selection(individualsSorted)
-    val newChild = context.crossOverOperator.crossover(parentFirst, parentSecond)
-    context.mutationOperator.mutate(newChild)
+    val children = context.crossOverOperator.crossover(parentFirst, parentSecond)
+    for { 
+      child <- children
+    } yield context.mutationOperator.mutate(child)
   }
 }
 

@@ -1,65 +1,48 @@
 package info.rnowak.simplega.algorithm
 
 import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
-import info.rnowak.simplega.operators.crossover.CrossOverOperator
-import info.rnowak.simplega.operators.mutation.MutationOperator
+import info.rnowak.simplega.operators.crossover.{Children, CrossOverOperator}
+import info.rnowak.simplega.operators.mutation.binary.SimpleInversionMutation
 import info.rnowak.simplega.operators.selection.SelectionOperator
-import info.rnowak.simplega.population.PermutationPopulation
-import info.rnowak.simplega.population.context.PermutationPopulationContext
-import info.rnowak.simplega.population.individual.PermutationIndividual
+import info.rnowak.simplega.population.BinaryPopulation
+import info.rnowak.simplega.population.context.BinaryPopulationContext
+import info.rnowak.simplega.population.individual.BinaryIndividual
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 class GeneticAlgorithmTest extends FlatSpec with Matchers {
 
-  class RandomSelection extends SelectionOperator[PermutationPopulation] {
-    override def selection(individualsSorted: Seq[IndividualWithFitness[PermutationIndividual]]): PermutationIndividual = {
+  class RandomSelection extends SelectionOperator[BinaryPopulation] {
+    override def selection(individualsSorted: Seq[IndividualWithFitness[BinaryIndividual]]): BinaryIndividual = {
       val random = Random.nextInt(individualsSorted.size)
       individualsSorted(random).individual      
     }
   }
   
-  class SimpleCrossover extends CrossOverOperator[PermutationPopulation] {
-    override def crossover(individualFirst: PermutationIndividual, individualSecond: PermutationIndividual): PermutationIndividual = {
-      individualSecond      
+  class SimpleCrossover extends CrossOverOperator[BinaryPopulation] {
+    override def crossover(individualFirst: BinaryIndividual, individualSecond: BinaryIndividual): Children[BinaryPopulation] = {
+      Seq(individualFirst, individualSecond)
     }
   }
   
-  class SimpleMutation extends MutationOperator[PermutationPopulation] {
-    override def mutate(individual: PermutationIndividual): PermutationIndividual = {
-      individual      
-    }
-  }
-  
-  class ConstantFitness(constant: Int) extends FitnessFunction[PermutationPopulation] {
-    override def calculateFor(population: PermutationPopulation): Seq[IndividualWithFitness[PermutationIndividual]] = {
+  class ConstantFitness(constant: Int) extends FitnessFunction[BinaryPopulation] {
+    override def calculateFor(population: BinaryPopulation): Seq[IndividualWithFitness[BinaryIndividual]] = {
       population.individuals.map { individual =>
-        IndividualWithFitness(individual, FitnessValue(5))
+        IndividualWithFitness(individual, FitnessValue(constant))
       }
     }
   }
 
   "GA" should "perform one iteration in run" in {
     val iterations = 1
-    val context = PermutationPopulationContext(populationSize = 3, 
+    val context = BinaryPopulationContext(populationSize = 3,
       individualLength = 3,
       selectionOperator = new RandomSelection(),
       crossOverOperator = new SimpleCrossover(),
-      mutationOperator = new SimpleMutation())
-    val ga = new GeneticAlgorithm[PermutationPopulation]()
+      mutationOperator = new SimpleInversionMutation())
+    val ga = new GeneticAlgorithm[BinaryPopulation]()
     
     val result = ga.run(populationContext = context, maxIterations = iterations, minimumFitness = FitnessValue(4))(fitness = new ConstantFitness(7))
-
-  }
-  
-  "Fitness function" should "return individuals with their rate" in {
-    val population = PermutationPopulation.initialPopulation(populationCount = 3, individualLength = 3)
-    val fitnessFunction = new ConstantFitness(7)
-    
-    val ratedIndividuals = fitnessFunction.calculateFor(population)
-    
-    ratedIndividuals should have size population.size
-    ratedIndividuals.map(_.fitness.value) should equal(Seq(5, 5, 5))
   }
 }
