@@ -1,6 +1,6 @@
 package info.rnowak.simplega.algorithm
 
-import info.rnowak.simplega.fitness.{FitnessValue, FitnessFunction, IndividualWithFitness}
+import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
 import info.rnowak.simplega.operators.crossover.CrossOverOperator
 import info.rnowak.simplega.operators.mutation.MutationOperator
 import info.rnowak.simplega.operators.selection.SelectionOperator
@@ -51,7 +51,6 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     
     val result = ga.run(populationContext = context, maxIterations = iterations, minimumFitness = FitnessValue(4))(fitness = new ConstantFitness(7))
 
-    result.totalIterations shouldEqual iterations
   }
   
   "Fitness function" should "return individuals with their rate" in {
@@ -62,18 +61,5 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     
     ratedIndividuals should have size population.size
     ratedIndividuals.map(_.fitness.value) should equal(Seq(5, 5, 5))
-  }
-  
-  "Populations stream" should "work" in {
-    val iterations = 1
-    val context = PermutationPopulationContext(populationSize = 3,
-      individualLength = 3,
-      selectionOperator = new RandomSelection(),
-      crossOverOperator = new SimpleCrossover(),
-      mutationOperator = new SimpleMutation())
-    val ga = new GeneticAlgorithm[PermutationPopulation]()    
-    
-    val population = context.createInitialPopulation()
-    ga.populationStream(population)(context, FitnessValue(5), new ConstantFitness(5))
   }
 }

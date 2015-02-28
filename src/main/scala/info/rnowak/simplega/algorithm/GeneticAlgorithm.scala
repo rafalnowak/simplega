@@ -1,6 +1,6 @@
 package info.rnowak.simplega.algorithm
 
-import info.rnowak.simplega.fitness.{FitnessValue, FitnessFunction, IndividualWithFitness}
+import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
 import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.context.PopulationContext
 
@@ -8,31 +8,43 @@ class GeneticAlgorithm[PopulationType <: Population] {
   //TODO: dodać warunki na prawdopodobieństwo mutacji, krzyżowania itd
   def run(populationContext: PopulationContext[PopulationType],
           minimumFitness: FitnessValue,
-          maxIterations: Int)
-         (fitness: FitnessFunction[PopulationType]): GeneticAlgorithmResult = {
+          maxIterations: Long)
+         (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
     val currentPopulation = populationContext.createInitialPopulation()
-    //TODO: tutaj umieścić stream
-    GeneticAlgorithmResult(totalIterations = maxIterations)
+    val algorithmSteps = populationStream(currentPopulation)(populationContext, minimumFitness, fitness, maxIterations)
+    algorithmSteps.takeWhile { step =>
+      //TODO: więcej mądrych warunków stopu
+      step.currentGeneration < maxIterations
+    }
   }
   
-  def populationStream(currentPopulation: PopulationType)
+  //TODO: posprzątać ten bałagan
+  private def populationStream(currentPopulation: PopulationType)
                       (populationContext: PopulationContext[PopulationType],
                        minimumFitness: FitnessValue,
-                       fitness: FitnessFunction[PopulationType]): Stream[PopulationType] = {
-    lazy val populations: Stream[PopulationType] = Stream.cons(currentPopulation, populations map { population =>
-      val individualsSortedByFitness = fitness.calculateFor(currentPopulation).sortBy(_.fitness.value)
-      val newIndividuals = for {
-        i <- 1 to currentPopulation.size
-      } yield crossOverAndMutate(individualsSortedByFitness)(populationContext)
-      val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
-      newPopulation
-    })
-    val x = populations.takeWhile { population =>
-      val individualsWithFitness = fitness.calculateFor(population)
-      val bestFitness = individualsWithFitness.map(_.fitness.value).min
-      bestFitness >= minimumFitness.value
-    }
-    x
+                       fitness: FitnessFunction[PopulationType],
+                       maxIterations: Long): Stream[AlgorithmStepResult[PopulationType]] = {
+    lazy val populations: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
+      initialStep(currentPopulation, fitness), 
+      populations map { step =>
+        val individualsSortedByFitness = fitness.calculateFor(currentPopulation).sortBy(_.fitness.value)
+        val newIndividuals = for {
+          i <- 1 to currentPopulation.size
+        } yield crossOverAndMutate(individualsSortedByFitness)(populationContext)
+        val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
+        AlgorithmStepResult[PopulationType](step.currentGeneration + 1, newPopulation, bestFitnessForPopulation(newPopulation, fitness))
+      }
+    )
+    populations
+  }
+  
+  private def initialStep(population: PopulationType, fitness: FitnessFunction[PopulationType]): AlgorithmStepResult[PopulationType] = 
+    AlgorithmStepResult(0, population, bestFitnessForPopulation(population, fitness))
+  
+  private def bestFitnessForPopulation(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue = {
+    val individualsWithFitness = fitness.calculateFor(population)
+    //TODO: dodac order dla fitness value
+    FitnessValue(individualsWithFitness.map(_.fitness.value).min)
   }
   
   private def crossOverAndMutate(individualsSorted: Seq[IndividualWithFitness[PopulationType#IndividualType]])
@@ -40,8 +52,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
     val parentFirst = context.selectionOperator.selection(individualsSorted)
     val parentSecond = context.selectionOperator.selection(individualsSorted)
     val newChild = context.crossOverOperator.crossover(parentFirst, parentSecond)
-    val mutated = context.mutationOperator.mutate(newChild)
-    mutated
+    context.mutationOperator.mutate(newChild)
   }
 }
 
