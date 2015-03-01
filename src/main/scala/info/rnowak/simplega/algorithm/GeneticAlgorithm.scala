@@ -44,8 +44,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
   
   private def bestFitnessForPopulation(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue = {
     val individualsWithFitness = fitness.calculateFor(population)
-    //TODO: dodac order dla fitness value
-    FitnessValue(individualsWithFitness.map(_.fitness.value).min)
+    individualsWithFitness.map(_.fitness).min
   }
   
   private def crossoverAndMutate(individualsSorted: Seq[IndividualWithFitness[PopulationType#IndividualType]])
