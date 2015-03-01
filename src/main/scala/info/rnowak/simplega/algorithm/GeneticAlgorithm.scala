@@ -31,7 +31,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
         val individualsSortedByFitness = fitness.calculateFor(currentPopulation).sortBy(_.fitness.value)
         val newIndividuals = for {
           i <- 1 to currentPopulation.size
-        } yield crossOverAndMutate(individualsSortedByFitness)(populationContext)
+        } yield crossoverAndMutate(individualsSortedByFitness)(populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals.flatten)
         AlgorithmStepResult[PopulationType](step.currentGeneration + 1, newPopulation, bestFitnessForPopulation(newPopulation, fitness))
       }
@@ -48,7 +48,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
     FitnessValue(individualsWithFitness.map(_.fitness.value).min)
   }
   
-  private def crossOverAndMutate(individualsSorted: Seq[IndividualWithFitness[PopulationType#IndividualType]])
+  private def crossoverAndMutate(individualsSorted: Seq[IndividualWithFitness[PopulationType#IndividualType]])
                                 (context: PopulationContext[PopulationType]): Children[PopulationType] = {
     val parentFirst = context.selectionOperator.selection(individualsSorted)
     val parentSecond = context.selectionOperator.selection(individualsSorted)

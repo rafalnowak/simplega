@@ -1,7 +1,8 @@
 package info.rnowak.simplega.algorithm
 
 import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
-import info.rnowak.simplega.operators.crossover.{Children, CrossOverOperator}
+import info.rnowak.simplega.operators.crossover.binary.OnePointCrossover
+import info.rnowak.simplega.operators.crossover.{Children, CrossoverOperator}
 import info.rnowak.simplega.operators.mutation.binary.SimpleInversionMutation
 import info.rnowak.simplega.operators.selection.SelectionOperator
 import info.rnowak.simplega.population.BinaryPopulation
@@ -20,12 +21,6 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     }
   }
   
-  class SimpleCrossover extends CrossOverOperator[BinaryPopulation] {
-    override def crossover(individualFirst: BinaryIndividual, individualSecond: BinaryIndividual): Children[BinaryPopulation] = {
-      Seq(individualFirst, individualSecond)
-    }
-  }
-  
   class ConstantFitness(constant: Int) extends FitnessFunction[BinaryPopulation] {
     override def calculateFor(population: BinaryPopulation): Seq[IndividualWithFitness[BinaryIndividual]] = {
       population.individuals.map { individual =>
@@ -39,7 +34,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     val context = BinaryPopulationContext(populationSize = 3,
       individualLength = 3,
       selectionOperator = new RandomSelection(),
-      crossOverOperator = new SimpleCrossover(),
+      crossOverOperator = new OnePointCrossover(),
       mutationOperator = new SimpleInversionMutation())
     val ga = new GeneticAlgorithm[BinaryPopulation]()
     
