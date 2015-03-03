@@ -3,7 +3,7 @@ package info.rnowak.simplega.algorithm
 import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
 import info.rnowak.simplega.operators.crossover.binary.OnePointCrossover
 import info.rnowak.simplega.operators.mutation.binary.SimpleInversionMutation
-import info.rnowak.simplega.operators.selection.binary.SimpleFitnessSelection
+import info.rnowak.simplega.operators.selection.binary.SimpleTournamentSelection
 import info.rnowak.simplega.population.BinaryPopulation
 import info.rnowak.simplega.population.context.BinaryPopulationContext
 import info.rnowak.simplega.population.individual.{BinaryIndividual, One}
@@ -23,15 +23,16 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
 
   "GA" should "perform one iteration in run" in {
     val iterations = 10
-    val context = BinaryPopulationContext(populationSize = 4,
-      individualLength = 3,
-      selectionOperator = new SimpleFitnessSelection(),
+    val context = BinaryPopulationContext(populationSize = 10,
+      individualLength = 5,
+      selectionOperator = new SimpleTournamentSelection(),
       crossOverOperator = new OnePointCrossover(),
       mutationOperator = new SimpleInversionMutation())
     val ga = new GeneticAlgorithm[BinaryPopulation]()
     
     val result = ga.run(populationContext = context, maxIterations = iterations, minimumFitness = FitnessValue(4))(fitness = new QuadraticFunctionFitness())
     val test = result.toList
+    test
     ()
   }
 }

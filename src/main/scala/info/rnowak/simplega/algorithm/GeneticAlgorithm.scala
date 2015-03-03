@@ -5,6 +5,8 @@ import info.rnowak.simplega.operators.crossover.Children
 import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.context.PopulationContext
 
+import scala.util.Random
+
 class GeneticAlgorithm[PopulationType <: Population] {
   //TODO: dodać warunki na prawdopodobieństwo mutacji, krzyżowania itd
   def run(populationContext: PopulationContext[PopulationType],
@@ -28,9 +30,11 @@ class GeneticAlgorithm[PopulationType <: Population] {
       initialStep(initialPopulation, fitness),
       populations map { step =>
         val individualsWithFitness = fitness.calculateFor(initialPopulation)
+        //TODO: parametr liczby wybieranych osobników
+        val selectedIndividuals = selectIndividuals(populationContext, initialPopulation.size, individualsWithFitness)
         val newIndividuals = for {
           i <- 1 to initialPopulation.size
-        } yield crossoverAndMutate(individualsWithFitness)(populationContext)
+        } yield crossoverAndMutate(selectedIndividuals)(populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals.flatten)
         AlgorithmStepResult[PopulationType](step.currentGeneration + 1, newPopulation, bestFitnessForPopulation(newPopulation, fitness))
       }
@@ -44,10 +48,17 @@ class GeneticAlgorithm[PopulationType <: Population] {
   private def bestFitnessForPopulation(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue = 
     fitness.calculateFor(population).map(_.fitness).min
   
-  private def crossoverAndMutate(individualsSorted: Seq[IndividualWithFitness[PopulationType#IndividualType]])
+  private def selectIndividuals(populationContext: PopulationContext[PopulationType],
+                                desiredSelectedCount: Int,
+                                individuals: Seq[IndividualWithFitness[PopulationType#IndividualType]]): Seq[PopulationType#IndividualType] = 
+    for {
+      i <- 1 to desiredSelectedCount      
+    } yield populationContext.selectionOperator.select(individuals)
+  
+  private def crossoverAndMutate(individuals: Seq[PopulationType#IndividualType])
                                 (context: PopulationContext[PopulationType]): Children[PopulationType] = {
-    val parentFirst = context.selectionOperator.selection(individualsSorted)
-    val parentSecond = context.selectionOperator.selection(individualsSorted)
+    val parentFirst = individuals(Random.nextInt(individuals.size))
+    val parentSecond = individuals(Random.nextInt(individuals.size))
     val children = context.crossOverOperator.crossover(parentFirst, parentSecond)
     for { 
       child <- children
