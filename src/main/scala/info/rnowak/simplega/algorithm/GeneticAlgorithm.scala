@@ -27,10 +27,10 @@ class GeneticAlgorithm[PopulationType <: Population] {
     lazy val populations: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
       initialStep(initialPopulation, fitness),
       populations map { step =>
-        val individualsSortedByFitness = fitness.calculateFor(initialPopulation).sortBy(_.fitness)
+        val individualsWithFitness = fitness.calculateFor(initialPopulation)
         val newIndividuals = for {
           i <- 1 to initialPopulation.size
-        } yield crossoverAndMutate(individualsSortedByFitness)(populationContext)
+        } yield crossoverAndMutate(individualsWithFitness)(populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals.flatten)
         AlgorithmStepResult[PopulationType](step.currentGeneration + 1, newPopulation, bestFitnessForPopulation(newPopulation, fitness))
       }
