@@ -61,12 +61,10 @@ class GeneticAlgorithm[PopulationType <: Population] {
     val children = context.crossOverOperator.crossover(parentFirst, parentSecond)
     for { 
       child <- children
-    } yield {
-      if(randomGenerator.nextDouble() > parameters.mutationProbability) {
-        context.mutationOperator.mutate(child)
-      } else {
-        child
-      }
+    } yield if(randomGenerator.nextDouble() > parameters.mutationProbability) {
+      context.mutationOperator.mutate(child)
+    } else {
+      child
     }
   }
 }
