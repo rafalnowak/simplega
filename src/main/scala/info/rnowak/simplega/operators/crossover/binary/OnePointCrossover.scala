@@ -8,10 +8,8 @@ import scala.util.Random
 
 class OnePointCrossover extends CrossoverOperator[BinaryPopulation] {
   override def crossover(first: BinaryIndividual, second: BinaryIndividual): Children[BinaryPopulation] = {
-    //TODO: czy da się to sprawdzać w czasie kompilacji?
     require(first.length == second.length, "Individuals must have same length")
     val crossOverPoint = Random.nextInt(first.length)
-    println(crossOverPoint)
     Seq(BinaryIndividual(first.bits.take(crossOverPoint) ++ second.bits.drop(crossOverPoint)),
       BinaryIndividual(second.bits.take(crossOverPoint) ++ first.bits.drop(crossOverPoint)))
   }
