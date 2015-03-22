@@ -19,7 +19,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
     val initialPopulation = populationContext.createInitialPopulation()
     populationStream(initialPopulation)(parameters, populationContext)(fitness) takeWhile { step =>
       //TODO: więcej mądrych warunków stopu
-      step.currentGeneration < parameters.maxGenerations
+      step.generationNumber < parameters.maxGenerations
     }
   }
   
@@ -28,16 +28,20 @@ class GeneticAlgorithm[PopulationType <: Population] {
                                populationContext: PopulationContext[PopulationType])
                               (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
     lazy val populations: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
-      AlgorithmStepResult.zero(initialPopulation, bestFitnessForPopulation(initialPopulation, fitness)),
+      AlgorithmStepResult[PopulationType](0, initialPopulation, bestIndividualForPopulation(initialPopulation, fitness)),
       populations map { step =>
         val individualsWithFitness = fitness.calculateFor(step.population)
         val newIndividuals = createNewIndividuals(individualsWithFitness)(parameters, populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
-        AlgorithmStepResult[PopulationType](step.currentGeneration + 1, newPopulation, bestFitnessForPopulation(newPopulation, fitness))
+        AlgorithmStepResult[PopulationType](step.generationNumber + 1, newPopulation, bestIndividualForPopulation(newPopulation, fitness))
       }
     )
     populations
   }
+
+  private def bestIndividualForPopulation(population: PopulationType,
+                                          fitness: FitnessFunction[PopulationType]): IndividualWithFitness[IndividualType] =
+    fitness.calculateFor(population).maxBy(_.fitness)
 
   private def createNewIndividuals(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]])
                                   (parameters: GeneticAlgorithmParameters,
@@ -55,9 +59,6 @@ class GeneticAlgorithm[PopulationType <: Population] {
     }
     createNewIndividualsIter(Nil)
   }
-
-  private def bestFitnessForPopulation(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue =
-    fitness.calculateFor(population).map(_.fitness).min
 
   private def selectIndividuals(populationContext: PopulationContext[PopulationType],
                                 desiredSelectedCount: Int,
