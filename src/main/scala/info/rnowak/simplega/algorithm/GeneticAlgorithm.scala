@@ -1,6 +1,6 @@
 package info.rnowak.simplega.algorithm
 
-import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
+import info.rnowak.simplega.fitness.{FitnessFunction, IndividualWithFitness}
 import info.rnowak.simplega.operators.crossover.Children
 import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.context.PopulationContext

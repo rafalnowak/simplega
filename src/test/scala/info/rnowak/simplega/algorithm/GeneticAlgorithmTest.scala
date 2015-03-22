@@ -12,7 +12,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class GeneticAlgorithmTest extends FlatSpec with Matchers {
   
-  class QuadraticFunctionFitness() extends FitnessFunction[BinaryPopulation] {
+  class SomeFunctionFitness() extends FitnessFunction[BinaryPopulation] {
     override def calculateFor(population: BinaryPopulation): Seq[IndividualWithFitness[BinaryIndividual]] = {
       population.individuals.map { individual =>
         val (_, indexes) = (individual.bits zip (0 to individual.length - 1).reverse filter { case (bit, _) => bit == One }).unzip
@@ -24,8 +24,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     }
   }
 
-  //"Every population in next generations" should "have the same size" in {
-  ignore should "bla" in {
+  "Every population in next generations" should "have the same size" in {
     val generations = 3
     val populationsSize = Table("size", 3, 6, 10, 13)
 
@@ -41,7 +40,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
         mutationOperator = new SimpleInversionMutation())
       val ga = new GeneticAlgorithm[BinaryPopulation]()
 
-      val result = ga.run(context)(parameters)(new QuadraticFunctionFitness())
+      val result = ga.run(context)(parameters)(new SomeFunctionFitness())
 
       result foreach { algorithmStep =>
         algorithmStep.population.size shouldEqual populationSize
@@ -51,7 +50,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
 
   "GA" should "find optimal solution" in {
     val parameters = new GeneticAlgorithmParameters(FitnessValue(4),
-      250,
+      200,
       crossoverProbability = BigDecimal(0.25),
       mutationProbability = BigDecimal(0.1))
     val context = BinaryPopulationContext(populationSize = 50,
@@ -61,7 +60,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
       mutationOperator = new SimpleInversionMutation())
     val ga = new GeneticAlgorithm[BinaryPopulation]()
 
-    val result = ga.run(context)(parameters)(new QuadraticFunctionFitness())
+    val result = ga.run(context)(parameters)(new SomeFunctionFitness())
 
     val resultCalculated = result.toList
     val bestValue = resultCalculated.last.bestIndividual.fitness.value
