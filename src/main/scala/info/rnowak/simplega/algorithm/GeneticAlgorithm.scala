@@ -5,9 +5,12 @@ import info.rnowak.simplega.operators.crossover.Children
 import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.context.PopulationContext
 
+import scala.annotation.tailrec
 import scala.util.Random
 
 class GeneticAlgorithm[PopulationType <: Population] {
+  type IndividualType = PopulationType#IndividualType
+
   private val randomGenerator = new Random()
 
   def run(populationContext: PopulationContext[PopulationType])
@@ -28,18 +31,29 @@ class GeneticAlgorithm[PopulationType <: Population] {
       AlgorithmStepResult.zero(initialPopulation, bestFitnessForPopulation(initialPopulation, fitness)),
       populations map { step =>
         val individualsWithFitness = fitness.calculateFor(step.population)
-        //TODO: parametr liczby wybieranych osobników
-        val newIndividuals = for {
-          i <- 1 to step.population.size
-        } yield {
-          val selectedIndividuals = selectIndividuals(populationContext, 2, individualsWithFitness)
-          crossoverAndMutate(selectedIndividuals)(parameters, populationContext)
-        }
-        val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals.flatten)
+        val newIndividuals = createNewIndividuals(individualsWithFitness)(parameters, populationContext)
+        val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
         AlgorithmStepResult[PopulationType](step.currentGeneration + 1, newPopulation, bestFitnessForPopulation(newPopulation, fitness))
       }
     )
     populations
+  }
+
+  private def createNewIndividuals(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]])
+                                  (parameters: GeneticAlgorithmParameters,
+                                   populationContext: PopulationContext[PopulationType]): Seq[IndividualType] = {
+    @tailrec
+    def createNewIndividualsIter(acc: Seq[IndividualType]): Seq[IndividualType] = {
+      if(acc.size >= individualsWithFitness.size) {
+        acc
+      } else {
+        val selectedIndividuals = selectIndividuals(populationContext, 2, individualsWithFitness)
+        val children = crossoverAndMutate(selectedIndividuals)(parameters, populationContext)
+        val childrenNumberToTake = individualsWithFitness.size - acc.size
+        createNewIndividualsIter(acc ++ children.take(childrenNumberToTake))
+      }
+    }
+    createNewIndividualsIter(Nil)
   }
 
   private def bestFitnessForPopulation(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue =
@@ -47,13 +61,13 @@ class GeneticAlgorithm[PopulationType <: Population] {
 
   private def selectIndividuals(populationContext: PopulationContext[PopulationType],
                                 desiredSelectedCount: Int,
-                                individuals: Seq[IndividualWithFitness[PopulationType#IndividualType]]): Seq[PopulationType#IndividualType] = 
+                                individuals: Seq[IndividualWithFitness[IndividualType]]): Seq[IndividualType] =
     for {
       i <- 1 to desiredSelectedCount      
     } yield populationContext.selectionOperator.select(individuals)
 
   //TODO: dodać prawdopodobieństwa krzyżowania
-  private def crossoverAndMutate(individuals: Seq[PopulationType#IndividualType])
+  private def crossoverAndMutate(individuals: Seq[IndividualType])
                                 (parameters: GeneticAlgorithmParameters,
                                  context: PopulationContext[PopulationType]): Children[PopulationType] = {
     val parentFirst = individuals(Random.nextInt(individuals.size))

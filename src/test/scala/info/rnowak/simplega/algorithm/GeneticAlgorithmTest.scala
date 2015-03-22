@@ -24,7 +24,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
 
   "Every population in next generations" should "have the same size" in {
     val generations = 3
-    val populationsSize = Table("size", 10, 11)
+    val populationsSize = Table("size", 3, 6, 10, 13)
 
     forAll(populationsSize) { populationSize =>
       val parameters = new GeneticAlgorithmParameters(FitnessValue(4),
