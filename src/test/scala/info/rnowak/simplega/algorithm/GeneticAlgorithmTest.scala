@@ -13,14 +13,13 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 class GeneticAlgorithmTest extends FlatSpec with Matchers {
   
   class SomeFunctionFitness() extends FitnessFunction[BinaryPopulation] {
-    override def calculateFor(population: BinaryPopulation): Seq[IndividualWithFitness[BinaryIndividual]] = {
-      population.individuals.map { individual =>
-        val (_, indexes) = (individual.bits zip (0 to individual.length - 1).reverse filter { case (bit, _) => bit == One }).unzip
-        val bitsValue = indexes.foldLeft(0) { (acc, index) => acc + Math.pow(2, index).toInt }
-        val x = -1.0 + bitsValue * (3.0 / (Math.pow(2, individual.length) - 1))
-        val fValue = x * Math.sin(10*Math.PI * x) + 1.0
-        IndividualWithFitness(individual, FitnessValue(fValue))
-      }
+    override def calculate(individual: BinaryIndividual): IndividualWithFitness[BinaryIndividual] = {
+      val (_, indexes) = (individual.bits zip (0 to individual.length - 1).reverse filter { case (bit, _) => bit == One }).unzip
+      val bitsValue = indexes.foldLeft(0) { (acc, index) => acc + Math.pow(2, index).toInt }
+      val range = 3.0
+      val x = -1.0 + bitsValue * (range / (Math.pow(2, individual.length) - 1))
+      val fValue = x * Math.sin(10*Math.PI * x) + 1.0
+      IndividualWithFitness(individual, FitnessValue(fValue))
     }
   }
 
@@ -63,6 +62,10 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     val result = ga.run(context)(parameters)(new SomeFunctionFitness())
 
     val resultCalculated = result.toList
+
+    resultCalculated.foreach { step =>
+      println(step)
+    }
     val bestValue = resultCalculated.last.bestIndividual.fitness.value
     val expectedBestValue = 2.85
     (bestValue - expectedBestValue).abs.toDouble should be < 0.001

@@ -30,7 +30,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
     lazy val populations: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
       AlgorithmStepResult[PopulationType](0, initialPopulation, bestIndividualForPopulation(initialPopulation, fitness)),
       populations map { step =>
-        val individualsWithFitness = fitness.calculateFor(step.population)
+        val individualsWithFitness = step.population.individuals map(fitness.calculate(_))
         val newIndividuals = createNewIndividuals(individualsWithFitness)(parameters, populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
         AlgorithmStepResult[PopulationType](step.generationNumber + 1, newPopulation, bestIndividualForPopulation(newPopulation, fitness))
@@ -41,7 +41,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
 
   private def bestIndividualForPopulation(population: PopulationType,
                                           fitness: FitnessFunction[PopulationType]): IndividualWithFitness[IndividualType] =
-    fitness.calculateFor(population).maxBy(_.fitness)
+    population.individuals map(fitness.calculate(_)) maxBy(_.fitness)
 
   private def createNewIndividuals(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]])
                                   (parameters: GeneticAlgorithmParameters,
