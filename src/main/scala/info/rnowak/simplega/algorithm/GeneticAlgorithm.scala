@@ -100,9 +100,9 @@ class GeneticAlgorithm[PopulationType <: Population] {
                                    (parameters: GeneticAlgorithmParameters,
                                     context: PopulationContext[PopulationType]): IndividualType =
     if(randomGenerator.nextDouble() > parameters.mutationProbability) {
-    context.mutationOperator.mutate(individual)
-  } else {
-    individual
-  }
+      context.mutationOperator.mutate(individual)
+    } else {
+      individual
+    }
 }
 

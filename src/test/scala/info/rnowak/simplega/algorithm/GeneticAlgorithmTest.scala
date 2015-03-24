@@ -50,7 +50,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
   "GA" should "find optimal solution" in {
     val parameters = new GeneticAlgorithmParameters(FitnessValue(4),
       200,
-      crossoverProbability = BigDecimal(0.25),
+      crossoverProbability = BigDecimal(0.01),
       mutationProbability = BigDecimal(0.1))
     val context = BinaryPopulationContext(populationSize = 50,
       individualLength = 22,
