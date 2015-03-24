@@ -66,6 +66,7 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     resultCalculated.foreach { step =>
       println(step)
     }
+    
     val bestValue = resultCalculated.last.bestIndividual.fitness.value
     val expectedBestValue = 2.85
     (bestValue - expectedBestValue).abs.toDouble should be < 0.001

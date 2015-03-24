@@ -56,14 +56,14 @@ class GeneticAlgorithm[PopulationType <: Population] {
                                   (parameters: GeneticAlgorithmParameters,
                                    populationContext: PopulationContext[PopulationType]): Seq[IndividualType] = {
     @tailrec
-    def createNewIndividualsIter(acc: Seq[IndividualType]): Seq[IndividualType] = {
-      if(acc.size >= individualsWithFitness.size) {
-        acc
+    def createNewIndividualsIter(individualsSoFar: Seq[IndividualType]): Seq[IndividualType] = {
+      if(individualsSoFar.size >= individualsWithFitness.size) {
+        individualsSoFar
       } else {
         val selectedIndividuals = selectIndividuals(populationContext, 2, individualsWithFitness)
         val children = crossoverAndMutate(selectedIndividuals)(parameters, populationContext)
-        val childrenNumberToTake = individualsWithFitness.size - acc.size
-        createNewIndividualsIter(acc ++ children.take(childrenNumberToTake))
+        val childrenNumberToTake = individualsWithFitness.size - individualsSoFar.size
+        createNewIndividualsIter(individualsSoFar ++ children.take(childrenNumberToTake))
       }
     }
     createNewIndividualsIter(Nil)
@@ -76,20 +76,33 @@ class GeneticAlgorithm[PopulationType <: Population] {
       i <- 1 to desiredSelectedCount      
     } yield populationContext.selectionOperator.select(individuals)
 
-  //TODO: dodać prawdopodobieństwa krzyżowania
   private def crossoverAndMutate(individuals: Seq[IndividualType])
                                 (parameters: GeneticAlgorithmParameters,
                                  context: PopulationContext[PopulationType]): Children[PopulationType] = {
     val parentFirst = individuals(Random.nextInt(individuals.size))
     val parentSecond = individuals(Random.nextInt(individuals.size))
-    val children = context.crossOverOperator.crossover(parentFirst, parentSecond)
+    val children = crossoverWithProbability(parentFirst, parentSecond)(parameters, context)
     for { 
       child <- children
-    } yield if(randomGenerator.nextDouble() > parameters.mutationProbability) {
-      context.mutationOperator.mutate(child)
+    } yield mutateWithProbability(child)(parameters, context)
+  }
+
+  private def crossoverWithProbability(firstParent: IndividualType, secondParent: IndividualType)
+                                      (parameters: GeneticAlgorithmParameters,
+                                       context: PopulationContext[PopulationType]): Children[PopulationType] =
+    if(randomGenerator.nextDouble() > parameters.crossoverProbability) {
+      context.crossOverOperator.crossover(firstParent, secondParent)
     } else {
-      child
+      Seq(firstParent, secondParent)
     }
+
+  private def mutateWithProbability(individual: IndividualType)
+                                   (parameters: GeneticAlgorithmParameters,
+                                    context: PopulationContext[PopulationType]): IndividualType =
+    if(randomGenerator.nextDouble() > parameters.mutationProbability) {
+    context.mutationOperator.mutate(individual)
+  } else {
+    individual
   }
 }
 
