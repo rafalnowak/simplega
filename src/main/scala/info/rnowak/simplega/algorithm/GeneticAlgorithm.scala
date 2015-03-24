@@ -1,6 +1,6 @@
 package info.rnowak.simplega.algorithm
 
-import info.rnowak.simplega.fitness.{FitnessValue, FitnessFunction, IndividualWithFitness}
+import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
 import info.rnowak.simplega.operators.crossover.Children
 import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.context.PopulationContext
@@ -28,12 +28,18 @@ class GeneticAlgorithm[PopulationType <: Population] {
                                populationContext: PopulationContext[PopulationType])
                               (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
     lazy val populations: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
-      AlgorithmStepResult[PopulationType](0, initialPopulation, meanFitnessValue(initialPopulation, fitness), bestIndividualForPopulation(initialPopulation, fitness)),
+      AlgorithmStepResult[PopulationType](0,
+        initialPopulation,
+        meanFitnessValue(initialPopulation, fitness),
+        evaluatePopulation(initialPopulation, fitness).maxBy(_.fitness)),
       populations map { step =>
-        val individualsWithFitness = step.population.individuals map(fitness.calculate(_))
+        val individualsWithFitness = evaluatePopulation(step.population, fitness)
         val newIndividuals = createNewIndividuals(individualsWithFitness)(parameters, populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
-        AlgorithmStepResult[PopulationType](step.generationNumber + 1, newPopulation, meanFitnessValue(newPopulation, fitness), bestIndividualForPopulation(newPopulation, fitness))
+        AlgorithmStepResult[PopulationType](step.generationNumber + 1,
+          newPopulation,
+          meanFitnessValue(newPopulation, fitness),
+          evaluatePopulation(newPopulation, fitness).maxBy(_.fitness))
       }
     )
     populations
@@ -42,9 +48,9 @@ class GeneticAlgorithm[PopulationType <: Population] {
   private def meanFitnessValue(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue =
     FitnessValue(population.individuals.map(fitness.calculate(_)).map(_.fitness.value).sum /  population.size)
 
-  private def bestIndividualForPopulation(population: PopulationType,
-                                          fitness: FitnessFunction[PopulationType]): IndividualWithFitness[IndividualType] =
-    population.individuals map(fitness.calculate(_)) maxBy(_.fitness)
+  private def evaluatePopulation(population: PopulationType,
+                                 fitness: FitnessFunction[PopulationType]): Seq[IndividualWithFitness[IndividualType]] =
+    population.individuals map(fitness.calculate(_))
 
   private def createNewIndividuals(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]])
                                   (parameters: GeneticAlgorithmParameters,

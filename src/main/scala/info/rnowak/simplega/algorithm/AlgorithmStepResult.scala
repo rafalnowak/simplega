@@ -7,5 +7,5 @@ case class AlgorithmStepResult[PopulationType <: Population](generationNumber: L
                                                              population: PopulationType,
                                                              meanValue: FitnessValue,
                                                              bestIndividual: IndividualWithFitness[PopulationType#IndividualType]) {
-  override def toString = s"$generationNumber : mean = $meanValue, best = $bestIndividual"
+  override def toString = s"$generationNumber : mean value = $meanValue, best = $bestIndividual"
 }
