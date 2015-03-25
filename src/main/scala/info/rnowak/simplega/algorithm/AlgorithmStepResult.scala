@@ -6,6 +6,8 @@ import info.rnowak.simplega.population.Population
 case class AlgorithmStepResult[PopulationType <: Population](generationNumber: Long,
                                                              population: PopulationType,
                                                              meanValue: FitnessValue,
-                                                             bestIndividual: IndividualWithFitness[PopulationType#IndividualType]) {
-  override def toString = s"$generationNumber : mean value = $meanValue, best = $bestIndividual"
+                                                             bestIndividual: IndividualWithFitness[PopulationType#IndividualType],
+                                                             generationWithoutImprovement: Long) {
+  override def toString = s"$generationNumber : mean value = $meanValue, " +
+    s"best = $bestIndividual, generation # without improvement = $generationWithoutImprovement"
 }

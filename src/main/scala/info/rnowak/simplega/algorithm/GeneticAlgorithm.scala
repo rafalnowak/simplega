@@ -31,15 +31,19 @@ class GeneticAlgorithm[PopulationType <: Population] {
       AlgorithmStepResult[PopulationType](0,
         initialPopulation,
         meanFitnessValue(initialPopulation, fitness),
-        evaluatePopulation(initialPopulation, fitness).maxBy(_.fitness)),
-      populations map { step =>
-        val individualsWithFitness = evaluatePopulation(step.population, fitness)
+        bestFitnessValue(evaluatePopulation(initialPopulation, fitness)),
+        0),
+      populations map { lastStep =>
+        val individualsWithFitness = evaluatePopulation(lastStep.population, fitness)
         val newIndividuals = createNewIndividuals(individualsWithFitness)(parameters, populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
-        AlgorithmStepResult[PopulationType](step.generationNumber + 1,
+        val newBestFitness = bestFitnessValue(evaluatePopulation(newPopulation, fitness))
+        AlgorithmStepResult[PopulationType](lastStep.generationNumber + 1,
           newPopulation,
           meanFitnessValue(newPopulation, fitness),
-          evaluatePopulation(newPopulation, fitness).maxBy(_.fitness))
+          newBestFitness,
+          generationNumberWithoutImprovement(lastStep, newBestFitness.fitness)
+        )
       }
     )
     populations
@@ -51,6 +55,16 @@ class GeneticAlgorithm[PopulationType <: Population] {
   private def evaluatePopulation(population: PopulationType,
                                  fitness: FitnessFunction[PopulationType]): Seq[IndividualWithFitness[IndividualType]] =
     population.individuals map(fitness.calculate(_))
+
+  private def bestFitnessValue(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]]): IndividualWithFitness[IndividualType] =
+    individualsWithFitness.maxBy(_.fitness)
+
+  private def generationNumberWithoutImprovement(lastStep: AlgorithmStepResult[PopulationType], currentBestFitness: FitnessValue): Long =
+    if(lastStep.bestIndividual.fitness != currentBestFitness) {
+      0
+    } else {
+      lastStep.generationWithoutImprovement + 1
+    }
 
   private def createNewIndividuals(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]])
                                   (parameters: GeneticAlgorithmParameters,
