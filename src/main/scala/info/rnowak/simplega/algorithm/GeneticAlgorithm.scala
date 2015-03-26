@@ -11,6 +11,7 @@ import scala.util.Random
 class GeneticAlgorithm[PopulationType <: Population] {
   type IndividualType = PopulationType#IndividualType
 
+  //TODO: użyć RNG?
   private val randomGenerator = new Random()
 
   def run(populationContext: PopulationContext[PopulationType])
@@ -27,17 +28,20 @@ class GeneticAlgorithm[PopulationType <: Population] {
                               (parameters: GeneticAlgorithmParameters,
                                populationContext: PopulationContext[PopulationType])
                               (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
+    val evaluate: PopulationType => Seq[IndividualWithFitness[IndividualType]] = evaluatePopulation(_, fitness)
+    val evaluateAndReturnBest: PopulationType => IndividualWithFitness[IndividualType] = evaluate andThen bestFitnessValue
+
     lazy val populations: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
       AlgorithmStepResult[PopulationType](0,
         initialPopulation,
         meanFitnessValue(initialPopulation, fitness),
-        bestFitnessValue(evaluatePopulation(initialPopulation, fitness)),
+        evaluateAndReturnBest(initialPopulation),
         0),
       populations map { lastStep =>
         val individualsWithFitness = evaluatePopulation(lastStep.population, fitness)
         val newIndividuals = createNewIndividuals(individualsWithFitness)(parameters, populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
-        val newBestFitness = bestFitnessValue(evaluatePopulation(newPopulation, fitness))
+        val newBestFitness = evaluateAndReturnBest(newPopulation)
         AlgorithmStepResult[PopulationType](lastStep.generationNumber + 1,
           newPopulation,
           meanFitnessValue(newPopulation, fitness),
