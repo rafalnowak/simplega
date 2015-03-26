@@ -123,5 +123,5 @@ class GeneticAlgorithm[PopulationType <: Population] {
 
   //TODO: więcej mądrych warunków stopu
   private def algorithmShouldContinue(step: AlgorithmStepResult[PopulationType])(parameters: GeneticAlgorithmParameters): Boolean =
-    step.generationNumber < parameters.maxGenerations || step.generationWithoutImprovement >= parameters.generationsWithoutImprovement
+    step.generationNumber < parameters.maxGenerations && step.generationWithoutImprovement <= parameters.generationsWithoutImprovement
 }
