@@ -14,7 +14,7 @@ object PermutationPopulation {
   def initialPopulation(populationCount: Int, individualLength: Int): PermutationPopulation = {
     val individuals = for {
       i <- 1 to populationCount
-    } yield PermutationIndividual(individualLength)
+    } yield PermutationIndividual.random(individualLength)
     PermutationPopulation(individuals)
   }
 }

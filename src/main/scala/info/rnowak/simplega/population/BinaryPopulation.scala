@@ -11,11 +11,10 @@ case class BinaryPopulation(individuals: Seq[BinaryIndividual]) extends Populati
 }
 
 object BinaryPopulation {
-  //TODO: uwsplonic z permutacyjnymi
   def initialPopulation(populationCount: Int, individualLength: Int): BinaryPopulation = {
     val individuals = for {
       i <- 1 to populationCount
-    } yield BinaryIndividual(individualLength)
+    } yield BinaryIndividual.random(individualLength)
     BinaryPopulation(individuals)
   }
 }

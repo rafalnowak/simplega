@@ -9,6 +9,6 @@ case class PermutationIndividual(permutation: List[Int]) extends Individual {
 }
 
 object PermutationIndividual {
-  def apply(individualSize: Int): PermutationIndividual =
+  def random(individualSize: Int): PermutationIndividual =
     PermutationIndividual(Random.shuffle(1 to individualSize).toList)
 }

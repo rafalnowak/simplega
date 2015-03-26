@@ -19,13 +19,13 @@ class GeneticAlgorithm[PopulationType <: Population] {
          (parameters: GeneticAlgorithmParameters)
          (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
     val initialPopulation = populationContext.createInitialPopulation()
-    algorithmStream(initialPopulation)(parameters, populationContext)(fitness) takeWhile (algorithmShouldContinue(_)(parameters))
+    algorithmStream(initialPopulation)(fitness)(parameters, populationContext) takeWhile (algorithmShouldContinue(_)(parameters))
   }
   
   private def algorithmStream(initialPopulation: PopulationType)
+                             (fitness: FitnessFunction[PopulationType])
                              (parameters: GeneticAlgorithmParameters,
-                              populationContext: PopulationContext[PopulationType])
-                             (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
+                              populationContext: PopulationContext[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
     val evaluate: PopulationType => ParSeq[IndividualWithFitness[IndividualType]] = evaluatePopulation(_, fitness)
     val evaluateAndReturnBest: PopulationType => IndividualWithFitness[IndividualType] = evaluate andThen bestFitnessValue
 
