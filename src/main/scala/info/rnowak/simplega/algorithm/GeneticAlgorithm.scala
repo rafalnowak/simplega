@@ -36,7 +36,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
         evaluateAndReturnBest(initialPopulation)
       ),
       algorithmSteps map { lastStep =>
-        val individualsWithFitness = evaluatePopulation(lastStep.population, fitness)
+        val individualsWithFitness = evaluate(lastStep.population)
         val newIndividuals = createNewIndividuals(individualsWithFitness)(parameters, populationContext)
         val newPopulation = populationContext.createPopulationFromIndividuals(newIndividuals)
         val newBestFitness = evaluateAndReturnBest(newPopulation)
