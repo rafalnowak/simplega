@@ -2,8 +2,4 @@ package info.rnowak.simplega.fitness
 
 import info.rnowak.simplega.population.Population
 
-trait FitnessFunction[PopulationType <: Population] {
-  type IndividualType = PopulationType#IndividualType
-  
-  def calculate(individual: IndividualType): IndividualWithFitness[IndividualType]
-}
+case class FitnessFunction[PopulationType <: Population](calculate: PopulationType#IndividualType => IndividualWithFitness[PopulationType#IndividualType])
