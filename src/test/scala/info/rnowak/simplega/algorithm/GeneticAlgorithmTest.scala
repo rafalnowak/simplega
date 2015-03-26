@@ -28,8 +28,9 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
     val populationsSize = Table("size", 3, 6, 10, 13)
 
     forAll(populationsSize) { populationSize =>
-      val parameters = new GeneticAlgorithmParameters(FitnessValue(4),
-        generations,
+      val parameters = new GeneticAlgorithmParameters(desiredFitness = FitnessValue(4),
+        maxGenerations = generations,
+        generationsWithoutImprovement = 10,
         crossoverProbability = BigDecimal(0.1),
         mutationProbability = BigDecimal(0.3))
       val context = BinaryPopulationContext(populationSize = populationSize,
@@ -48,8 +49,9 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
   }
 
   "GA" should "find optimal solution" in {
-    val parameters = new GeneticAlgorithmParameters(FitnessValue(4),
-      200,
+    val parameters = new GeneticAlgorithmParameters(desiredFitness = FitnessValue(4),
+      maxGenerations = 250,
+      generationsWithoutImprovement = 5,
       crossoverProbability = BigDecimal(0.01),
       mutationProbability = BigDecimal(0.1))
     val context = BinaryPopulationContext(populationSize = 50,
