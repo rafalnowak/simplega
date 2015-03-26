@@ -17,7 +17,7 @@ class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorith
 
   def run(fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
     val initialPopulation = populationContext.createInitialPopulation()
-    algorithmStream(initialPopulation)(fitness) takeWhile (algorithmShouldContinue(_)(parameters))
+    algorithmStream(initialPopulation)(fitness) takeWhile algorithmShouldContinue
   }
   
   private def algorithmStream(initialPopulation: PopulationType)
@@ -109,6 +109,6 @@ class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorith
     }
 
   //TODO: więcej mądrych warunków stopu
-  private def algorithmShouldContinue(step: AlgorithmStepResult[PopulationType])(parameters: GeneticAlgorithmParameters): Boolean =
+  private def algorithmShouldContinue(step: AlgorithmStepResult[PopulationType]): Boolean =
     step.generationNumber < parameters.maxGenerations && step.generationWithoutImprovement <= parameters.generationsWithoutImprovement
 }
