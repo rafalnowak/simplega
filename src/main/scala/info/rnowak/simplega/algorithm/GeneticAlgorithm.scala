@@ -6,6 +6,7 @@ import info.rnowak.simplega.population.Population
 import info.rnowak.simplega.population.context.PopulationContext
 
 import scala.annotation.tailrec
+import scala.collection.parallel.ParSeq
 import scala.util.Random
 
 class GeneticAlgorithm[PopulationType <: Population] {
@@ -28,7 +29,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
                               (parameters: GeneticAlgorithmParameters,
                                populationContext: PopulationContext[PopulationType])
                               (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
-    val evaluate: PopulationType => Seq[IndividualWithFitness[IndividualType]] = evaluatePopulation(_, fitness)
+    val evaluate: PopulationType => ParSeq[IndividualWithFitness[IndividualType]] = evaluatePopulation(_, fitness)
     val evaluateAndReturnBest: PopulationType => IndividualWithFitness[IndividualType] = evaluate andThen bestFitnessValue
 
     lazy val populations: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
@@ -57,10 +58,10 @@ class GeneticAlgorithm[PopulationType <: Population] {
     FitnessValue(population.individuals.map(fitness.calculate(_)).map(_.fitness.value).sum /  population.size)
 
   private def evaluatePopulation(population: PopulationType,
-                                 fitness: FitnessFunction[PopulationType]): Seq[IndividualWithFitness[IndividualType]] =
-    population.individuals map(fitness.calculate(_))
+                                 fitness: FitnessFunction[PopulationType]): ParSeq[IndividualWithFitness[IndividualType]] =
+    population.individuals.par.map(fitness.calculate(_))
 
-  private def bestFitnessValue(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]]): IndividualWithFitness[IndividualType] =
+  private def bestFitnessValue(individualsWithFitness: ParSeq[IndividualWithFitness[IndividualType]]): IndividualWithFitness[IndividualType] =
     individualsWithFitness.maxBy(_.fitness)
 
   private def generationNumberWithoutImprovement(lastStep: AlgorithmStepResult[PopulationType], currentBestFitness: FitnessValue): Long =
@@ -70,7 +71,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
       lastStep.generationWithoutImprovement + 1
     }
 
-  private def createNewIndividuals(individualsWithFitness: Seq[IndividualWithFitness[IndividualType]])
+  private def createNewIndividuals(individualsWithFitness: ParSeq[IndividualWithFitness[IndividualType]])
                                   (parameters: GeneticAlgorithmParameters,
                                    populationContext: PopulationContext[PopulationType]): Seq[IndividualType] = {
     @tailrec
@@ -89,7 +90,7 @@ class GeneticAlgorithm[PopulationType <: Population] {
 
   private def selectIndividuals(populationContext: PopulationContext[PopulationType],
                                 desiredSelectedCount: Int,
-                                individuals: Seq[IndividualWithFitness[IndividualType]]): Seq[IndividualType] =
+                                individuals: ParSeq[IndividualWithFitness[IndividualType]]): Seq[IndividualType] =
     for {
       i <- 1 to desiredSelectedCount      
     } yield populationContext.selectionOperator.select(individuals)

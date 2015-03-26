@@ -7,8 +7,8 @@ import info.rnowak.simplega.operators.selection.binary.SimpleTournamentSelection
 import info.rnowak.simplega.population.BinaryPopulation
 import info.rnowak.simplega.population.context.BinaryPopulationContext
 import info.rnowak.simplega.population.individual.{BinaryIndividual, One}
-import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.{FlatSpec, Matchers}
 
 class GeneticAlgorithmTest extends FlatSpec with Matchers {
   

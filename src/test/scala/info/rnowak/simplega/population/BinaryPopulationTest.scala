@@ -1,6 +1,6 @@
 package info.rnowak.simplega.population
 
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 class BinaryPopulationTest extends FlatSpec with Matchers {
   "Binary population" should "generate initial population with given individuals count" in {
