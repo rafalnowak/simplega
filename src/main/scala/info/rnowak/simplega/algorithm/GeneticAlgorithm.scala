@@ -12,6 +12,8 @@ import scala.util.Random
 class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorithmParameters, populationContext: PopulationContext[PopulationType]) {
   type IndividualType = PopulationType#IndividualType
 
+  import info.rnowak.simplega.fitness.FitnessValue._
+
   //TODO: użyć RNG?
   private val randomGenerator = new Random()
 
@@ -48,7 +50,7 @@ class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorith
   }
 
   private def meanFitnessValue(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue =
-    FitnessValue(evaluatePopulation(population, fitness).map(_.fitness.value).sum /  population.size)
+    (evaluatePopulation(population, fitness).map(_.fitness.value).sum /  population.size).fitness
 
   private def evaluatePopulation(population: PopulationType,
                                  fitness: FitnessFunction[PopulationType]): ParSeq[IndividualWithFitness[IndividualType]] =
@@ -110,5 +112,6 @@ class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorith
 
   //TODO: więcej mądrych warunków stopu
   private def algorithmShouldContinue(step: AlgorithmStepResult[PopulationType]): Boolean =
-    step.generationNumber < parameters.maxGenerations && step.generationWithoutImprovement <= parameters.generationsWithoutImprovement
+    step.generationNumber < parameters.maxGenerations &&
+      step.generationWithoutImprovement <= parameters.generationsWithoutImprovement
 }
