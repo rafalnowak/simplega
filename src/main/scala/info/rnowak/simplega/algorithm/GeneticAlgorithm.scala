@@ -9,7 +9,11 @@ import scala.annotation.tailrec
 import scala.collection.parallel.ParSeq
 import scala.util.Random
 
-class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorithmParameters, populationContext: PopulationContext[PopulationType]) {
+class GeneticAlgorithm[PopulationType <: Population](
+          parameters: GeneticAlgorithmParameters,
+          populationContext: PopulationContext[PopulationType],
+          fitness: FitnessFunction[PopulationType]) {
+
   type IndividualType = PopulationType#IndividualType
 
   import info.rnowak.simplega.fitness.FitnessValue._
@@ -17,20 +21,19 @@ class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorith
   //TODO: użyć RNG?
   private val randomGenerator = new Random()
 
-  def run(fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
+  def run(): Stream[AlgorithmStepResult[PopulationType]] = {
     val initialPopulation = populationContext.createInitialPopulation()
-    algorithmStream(initialPopulation)(fitness) takeWhile algorithmShouldContinue
+    algorithmStream(initialPopulation) takeWhile algorithmShouldContinue
   }
   
-  private def algorithmStream(initialPopulation: PopulationType)
-                             (fitness: FitnessFunction[PopulationType]): Stream[AlgorithmStepResult[PopulationType]] = {
-    val evaluate: PopulationType => ParSeq[IndividualWithFitness[IndividualType]] = evaluatePopulation(_, fitness)
+  private def algorithmStream(initialPopulation: PopulationType): Stream[AlgorithmStepResult[PopulationType]] = {
+    val evaluate: PopulationType => ParSeq[IndividualWithFitness[IndividualType]] = evaluatePopulation
     val evaluateAndReturnBest: PopulationType => IndividualWithFitness[IndividualType] = evaluate andThen bestFitnessValue
 
     lazy val algorithmSteps: Stream[AlgorithmStepResult[PopulationType]] = Stream.cons(
       AlgorithmStepResult.zero[PopulationType](
         initialPopulation,
-        meanFitnessValue(initialPopulation, fitness),
+        meanFitnessValue(initialPopulation),
         evaluateAndReturnBest(initialPopulation)
       ),
       algorithmSteps map { lastStep =>
@@ -40,7 +43,7 @@ class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorith
         val newBestFitness = evaluateAndReturnBest(newPopulation)
         AlgorithmStepResult[PopulationType](lastStep.generationNumber + 1,
           newPopulation,
-          meanFitnessValue(newPopulation, fitness),
+          meanFitnessValue(newPopulation),
           newBestFitness,
           generationNumberWithoutImprovement(lastStep, newBestFitness.fitness)
         )
@@ -49,11 +52,10 @@ class GeneticAlgorithm[PopulationType <: Population](parameters: GeneticAlgorith
     algorithmSteps
   }
 
-  private def meanFitnessValue(population: PopulationType, fitness: FitnessFunction[PopulationType]): FitnessValue =
-    (evaluatePopulation(population, fitness).map(_.fitness.value).sum /  population.size).fitness
+  private def meanFitnessValue(population: PopulationType): FitnessValue =
+    (evaluatePopulation(population).map(_.fitness.value).sum /  population.size).fitness
 
-  private def evaluatePopulation(population: PopulationType,
-                                 fitness: FitnessFunction[PopulationType]): ParSeq[IndividualWithFitness[IndividualType]] =
+  private def evaluatePopulation(population: PopulationType): ParSeq[IndividualWithFitness[IndividualType]] =
     population.individuals.par.map(fitness.calculate)
 
   private def bestFitnessValue(individualsWithFitness: ParSeq[IndividualWithFitness[IndividualType]]): IndividualWithFitness[IndividualType] =

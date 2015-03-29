@@ -36,9 +36,9 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
         crossoverProbability = BigDecimal(0.1),
         mutationProbability = BigDecimal(0.3))
       val context = buildDefaultContext(populationSize, 5)
-      val ga = new GeneticAlgorithm[BinaryPopulation](parameters, context)
+      val ga = new GeneticAlgorithm[BinaryPopulation](parameters, context, new SomeFunctionFitness())
 
-      val result = ga.run(new SomeFunctionFitness())
+      val result = ga.run()
 
       result foreach { algorithmStep =>
         algorithmStep.population.size shouldEqual populationSize
@@ -53,9 +53,9 @@ class GeneticAlgorithmTest extends FlatSpec with Matchers {
       crossoverProbability = BigDecimal(0.01),
       mutationProbability = BigDecimal(0.1))
     val context = buildDefaultContext(50, 22)
-    val ga = new GeneticAlgorithm[BinaryPopulation](parameters, context)
+    val ga = new GeneticAlgorithm[BinaryPopulation](parameters, context, new SomeFunctionFitness())
 
-    val result = ga.run(new SomeFunctionFitness())
+    val result = ga.run()
 
     val resultCalculated = result.toList
 
