@@ -3,7 +3,7 @@ package info.rnowak.simplega.algorithm
 import info.rnowak.simplega.fitness.{FitnessFunction, FitnessValue, IndividualWithFitness}
 import info.rnowak.simplega.operators.crossover.binary.OnePointCrossover
 import info.rnowak.simplega.operators.mutation.binary.SimpleInversionMutation
-import info.rnowak.simplega.operators.selection.binary.SimpleTournamentSelection
+import info.rnowak.simplega.operators.selection.SimpleTournamentSelection
 import info.rnowak.simplega.population.BinaryPopulation
 import info.rnowak.simplega.population.context.BinaryPopulationContext
 import info.rnowak.simplega.population.individual.{BinaryIndividual, One}
