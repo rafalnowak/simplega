@@ -1,25 +1,26 @@
 package info.rnowak.simplega.util
 
 trait RNG {
-  def nextInt: (Int, RNG)
-  def nextDouble: (Double, RNG)
+  def nextInt: (RNG, Int)
+  def nonNegativeInt: (RNG, Int)
+  def nextDouble: (RNG, Double)
 }
 
 case class SimpleRNG(seed: Long) extends RNG {
-  def nextInt: (Int, RNG) = {
+  override def nextInt: (RNG, Int) = {
     val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
     val nextRNG = SimpleRNG(newSeed)
     val n = (newSeed >>> 16).toInt
-    (n, nextRNG)
+    (nextRNG, n)
   }
 
-  def nonNegativeInt: (Int, RNG) = {
-    val (newInt, nextRng) = this.nextInt
-    (if (newInt < 0) -(newInt + 1) else newInt, nextRng)
+  override def nonNegativeInt: (RNG, Int) = {
+    val (nextRng, randomInt) = this.nextInt
+    (nextRng, if (randomInt < 0) -(randomInt + 1) else randomInt)
   }
 
-  def nextDouble: (Double, RNG) = {
-    val (newInt, newRng) = this.nonNegativeInt
-    (newInt / (Int.MaxValue.toDouble + 1), newRng)
+  override def nextDouble: (RNG, Double) = {
+    val (nextRng, randomInt) = this.nonNegativeInt
+    (nextRng, randomInt / (Int.MaxValue.toDouble + 1))
   }
 }

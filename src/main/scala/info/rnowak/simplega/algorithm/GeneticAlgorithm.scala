@@ -14,9 +14,9 @@ class GeneticAlgorithm[PopulationType <: Population](
           populationContext: PopulationContext[PopulationType],
           fitness: FitnessFunction[PopulationType]) {
 
-  type IndividualType = PopulationType#IndividualType
-
   import info.rnowak.simplega.fitness.FitnessValue._
+
+  type IndividualType = PopulationType#IndividualType
 
   //TODO: użyć RNG?
   private val randomGenerator = new Random()
@@ -90,8 +90,8 @@ class GeneticAlgorithm[PopulationType <: Population](
     } yield populationContext.selectionOperator.select(individuals)
 
   private def crossoverAndMutate(individuals: Seq[IndividualType]): Children[PopulationType] = {
-    val parentFirst = individuals(Random.nextInt(individuals.size))
-    val parentSecond = individuals(Random.nextInt(individuals.size))
+    val parentFirst = individuals(randomGenerator.nextInt(individuals.size))
+    val parentSecond = individuals(randomGenerator.nextInt(individuals.size))
     val children = crossoverWithProbability(parentFirst, parentSecond)
     for { 
       child <- children
