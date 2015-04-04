@@ -11,3 +11,10 @@ The library comes with two predefined population types:
 
 For both of them are defined basic genetic operators for selection, crossover and mutation. 
 With their generic interface it is very easy to add new custom operator functions.
+
+TODO:
+=====
+
+* create operators for permutation population
+* write more example
+* use State monad and more "functional" way of program structure

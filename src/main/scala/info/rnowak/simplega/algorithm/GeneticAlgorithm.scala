@@ -18,7 +18,7 @@ class GeneticAlgorithm[PopulationType <: Population](
 
   type IndividualType = PopulationType#IndividualType
 
-  //TODO: użyć RNG?
+  //TODO: user RNG?
   private val randomGenerator = new Random()
 
   def run(): Stream[AlgorithmStepResult[PopulationType]] = {
@@ -112,7 +112,7 @@ class GeneticAlgorithm[PopulationType <: Population](
       individual
     }
 
-  //TODO: więcej mądrych warunków stopu
+  //TODO: more stop conditions
   private def algorithmShouldContinue(step: AlgorithmStepResult[PopulationType]): Boolean =
     step.generationNumber < parameters.maxGenerations &&
       step.generationWithoutImprovement <= parameters.generationsWithoutImprovement
